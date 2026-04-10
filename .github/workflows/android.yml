@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, beta ]
 
 jobs:
   build:
@@ -29,21 +29,32 @@ jobs:
         name: apk
         path: app/build/outputs/apk/release/*.apk
 
+    - name: Set release tag
+      id: set-tag
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          echo "tag=latest" >> $GITHUB_OUTPUT
+          echo "title=Latest" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref_name }}" = "beta" ]; then
+          echo "tag=beta" >> $GITHUB_OUTPUT
+          echo "title=Beta" >> $GITHUB_OUTPUT
+        fi
+
     - name: Generate release notes
-      run: git log refs/tags/latest..HEAD --oneline --decorate=no > notes.txt
+      run: git log refs/tags/${{ steps.set-tag.outputs.tag }}..HEAD --oneline --decorate=no > notes.txt
 
     - name: Update tag
       run: |
-        git tag -f latest
-        git push -f origin tag latest
+        git tag -f ${{ steps.set-tag.outputs.tag }}
+        git push -f origin tag ${{ steps.set-tag.outputs.tag }}
 
     - name: Delete release
       continue-on-error: true
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh release delete latest -y
+      run: gh release delete ${{ steps.set-tag.outputs.tag }} -y
 
     - name: Create release
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh release create latest --title "Latest" --notes-file notes.txt --latest=true 'app/build/outputs/apk/release/*.apk'
+      run: gh release create ${{ steps.set-tag.outputs.tag }} --title "${{ steps.set-tag.outputs.title }}" --notes-file notes.txt --latest=true 'app/build/outputs/apk/release/*.apk'
