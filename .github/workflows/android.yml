@@ -43,7 +43,7 @@ jobs:
         fi
 
     - name: Generate release notes
-      run: git log refs/tags/${{ steps.set-tag.outputs.tag }}..HEAD --oneline --decorate=no > notes.txt
+      run: git log refs/tags/${{ steps.set-tag.outputs.tag }}..HEAD --oneline --decorate=no > notes.txt 2>/dev/null || git log -10 --oneline --decorate=no > notes.txt
 
     - name: Update tag
       run: |
