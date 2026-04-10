@@ -1,19 +1,29 @@
-# Xtra, Twitch Client
+![Banner of Xtra for TV Logo](https://github.com/Official-Pepe/Xtra-TV-Fork-master/blob/main/app/src/main/res/mipmap-xxxhdpi/ic_banner.png?raw=true)
+> [!NOTE]
+> This is a Fork of [Xtra](https://github.com/crackededed/Xtra), a twich client for Android.
 
-<img src="https://github.com/AndreyAsadchy/Xtra/blob/197ba90cac879abd2a5645393ce361847f12fa0b/app/src/main/ic_launcher-web.png" align="left" width="100"/>
+# Info
+<p>This Fork of Xtra is made for Android-TV</p>
+I'm new to all of this, and github and being the one on the other side of the downlaoad button that is quite a bit overwelming
 
-Xtra is a Twitch player and browser for Android.
+<br>
+<br>
 
-</br>
-</br>
+## To Do
+##### Design
+- [x] Banner
+- [x] Launcher - icon
+##### Settings
+- [ ] Info Page
+- [ ] Update function
+##### UI Changes
+- [ ] Move the Content page to the side
+##### Readme
+- [x] New Readme
+<p>This is for now the way i will follow</p>
 
-## Download
-
-[<img src="https://f-droid.org/badge/get-it-on.png"
-      alt="Get it on F-Droid"
-      height="80">](https://f-droid.org/packages/com.github.andreyasadchy.xtra/)
-
-You can find released APKs [here](https://github.com/crackededed/Xtra/releases/tag/latest).
+<br>
+<br>
 
 [Xtra subreddit](https://www.reddit.com/r/XtraForTwitch)
 
