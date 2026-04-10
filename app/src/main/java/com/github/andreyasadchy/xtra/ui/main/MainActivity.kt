@@ -21,6 +21,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
@@ -49,10 +50,8 @@ import androidx.lifecycle.withStarted
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -181,10 +180,6 @@ class MainActivity : AppCompatActivity() {
                 windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
             }
             binding.navHostFragment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.left
-                rightMargin = insets.right
-            }
-            binding.navBarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
                 rightMargin = insets.right
             }
@@ -461,11 +456,11 @@ class MainActivity : AppCompatActivity() {
     private fun setNavBarColor(isPortrait: Boolean) {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                window.isNavigationBarContrastEnforced = !isPortrait || !binding.navBarContainer.isVisible
+                window.isNavigationBarContrastEnforced = !isPortrait || false
             }
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
                 @Suppress("DEPRECATION")
-                window.navigationBarColor = if (isPortrait && binding.navBarContainer.isVisible) {
+                window.navigationBarColor = if (isPortrait && false) {
                     Color.TRANSPARENT
                 } else {
                     val isLightTheme = obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.isLightTheme)).use {
@@ -480,7 +475,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 @Suppress("DEPRECATION")
                 if (!isLightTheme) {
-                    window.navigationBarColor = if (isPortrait && binding.navBarContainer.isVisible) {
+                    window.navigationBarColor = if (isPortrait && false) {
                         Color.TRANSPARENT
                     } else {
                         ContextCompat.getColor(this, R.color.darkScrim)
@@ -493,6 +488,20 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         setNavBarColor(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_MENU -> {
+                if (binding.drawerLayout.isDrawerOpen(binding.navView)) {
+                    binding.drawerLayout.closeDrawers()
+                } else {
+                    binding.drawerLayout.openDrawer(binding.navView)
+                }
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onResume() {
@@ -700,7 +709,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             INTENT_OPEN_DOWNLOADS_TAB -> {
-                binding.navBar.selectedItemId = if (prefs.getBoolean(C.UI_SAVEDPAGER, true)) {
+                binding.navView.setCheckedItem(if (prefs.getBoolean(C.UI_SAVEDPAGER, true)) {
                     R.id.savedPagerFragment
                 } else {
                     R.id.savedMediaFragment
@@ -1034,11 +1043,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, null)
-        binding.navBar.apply {
+        binding.navView.apply {
             if (!prefs.getBoolean(C.UI_THEME_BOTTOM_NAV_COLOR, true) && prefs.getBoolean(C.UI_THEME_MATERIAL3, true)) {
                 setBackgroundColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurface))
             }
             if (tabList.any { it.split(':')[2] != "0" }) {
+                menu.clear()
                 tabList.forEach {
                     val split = it.split(':')
                     val key = split[0]
@@ -1065,20 +1075,13 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                binding.navBarContainer.visibility = View.GONE
+                binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
             setupWithNavController(navController)
-            setOnItemSelectedListener {
+            setNavigationItemSelectedListener {
                 NavigationUI.onNavDestinationSelected(it, navController)
-                return@setOnItemSelectedListener true
-            }
-            setOnItemReselectedListener {
-                if (!navController.popBackStack(it.itemId, false)) {
-                    val currentFragment = supportFragmentManager.findFragmentById(R.id.navHostFragment)?.childFragmentManager?.fragments?.getOrNull(0)
-                    if (currentFragment is Scrollable) {
-                        currentFragment.scrollToTop()
-                    }
-                }
+                binding.drawerLayout.closeDrawers()
+                return@setNavigationItemSelectedListener true
             }
         }
     }
